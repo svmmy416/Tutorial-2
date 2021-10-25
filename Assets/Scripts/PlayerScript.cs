@@ -10,14 +10,40 @@ public class PlayerScript : MonoBehaviour
     public float speed;
     public Text score;
     private int scoreValue = 0;
+    public Text win;
+    public Text lives;
+    private int livesValue = 3;
+
+    public Transform destination;
+    private int marker = 1;
+
+    public AudioClip musicClipOne;
+
+    public AudioClip musicClipTwo;
+
+    public AudioSource musicSource;
 
     // Start is called before the first frame update
     void Start()
     {
         rd2d = GetComponent<Rigidbody2D>();
-        score.text = scoreValue.ToString();
+        score.text = "Score: " + scoreValue.ToString();
+        win.text = "";
+        lives.text = "Lives: " + livesValue.ToString();
+        musicSource.clip = musicClipOne;
+        musicSource.Play();
     }
 
+    void Update()
+    {
+        if (scoreValue == 4 && marker == 1)
+        {
+            GameObject.FindWithTag("Player").transform.position = destination.transform.position;
+            marker = marker + 1;
+            livesValue = 3;
+            lives.text = "Lives: " + livesValue.ToString();
+        }
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -29,7 +55,6 @@ public class PlayerScript : MonoBehaviour
         {
             Application.Quit();
         }
-
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -37,8 +62,27 @@ public class PlayerScript : MonoBehaviour
         if (collision.collider.tag == "Coin")
         {
             scoreValue += 1;
-            score.text = scoreValue.ToString();
+            score.text = "Score: " + scoreValue.ToString();
             Destroy(collision.collider.gameObject);
+        }
+        if (scoreValue == 8)
+        {
+            win.text = "You Win! Game Created by Samuel Clarke";
+             musicSource.clip = musicClipTwo;
+             musicSource.Play();
+             musicSource.loop = false;
+            rd2d.isKinematic = true;
+        }
+        if (collision.collider.tag == "Enemy")
+        {
+            livesValue -= 1;
+            lives.text = "Lives: " + livesValue.ToString();
+            Destroy(collision.collider.gameObject);
+        }
+        if (livesValue == 0)
+        {
+            win.text = "You Lose! Game Created by Samuel Clarke";
+            Destroy(gameObject);
         }
     }
 
@@ -48,7 +92,7 @@ public class PlayerScript : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.W))
             {
-              rd2d.AddForce(new Vector2(0, 3), ForceMode2D.Impulse); 
+              rd2d.AddForce(new Vector2(0, 4), ForceMode2D.Impulse); 
             }
         }
     }
